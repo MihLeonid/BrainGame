@@ -1,5 +1,6 @@
 import argparse
 import time
+import math
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -8,7 +9,7 @@ from brainflow.board_shim import BoardShim, BrainFlowInputParams, BoardIds
 from brainflow.data_filter import DataFilter, FilterTypes, AggOperations
 
 
-BOARD_ID = BoardIds.BRAINBIT_BOARD
+BOARD_ID = BoardIds.SYNTHETIC_BOARD # BRAINBIT_BOARD
 EEG_CHANNELS = BoardShim.get_eeg_channels(BOARD_ID)
 
 
@@ -31,10 +32,16 @@ board.start_stream()
 while True:
     time.sleep(0.05)
 
-    data = board.get_current_board_data(50)
     ax.clear()
     ax.set_xlim(0, 50)
-    ax.set_ylim(-512, 512)
+
+    data = board.get_current_board_data(50)
+
+    limit = 0
+    for chan in EEG_CHANNELS:
+        limit = max(limit, 2 ** math.ceil(math.log2(max(map(abs, data[chan])))))
+
+    ax.set_ylim(-limit, limit)
     for chan in EEG_CHANNELS:
         ax.plot(data[chan])
     plt.draw()
