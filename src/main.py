@@ -12,27 +12,33 @@ BOARD_ID = BoardIds.BRAINBIT_BOARD
 EEG_CHANNELS = BoardShim.get_eeg_channels(BOARD_ID)
 
 
+fig, ax = plt.subplots(1, 1)
+plt.ion()
+plt.show()
+
+background = fig.canvas.copy_from_bbox(ax.bbox)
+
+
 params = BrainFlowInputParams()
-# params.serial_number = args.serial_number
 params.timeout = 15  # discovery timeout (seconds)
-# params.file = args.file
 
 BoardShim.enable_dev_board_logger()
-# BoardShim.disable_board_logger()
 
 board = BoardShim(BOARD_ID, params)
 board.prepare_session()
-
-
-
 board.start_stream()
-time.sleep(0.05)
-data = board.get_board_data()
+
+while True:
+    time.sleep(0.05)
+
+    data = board.get_current_board_data(50)
+    ax.clear()
+    ax.set_xlim(0, 50)
+    ax.set_ylim(-512, 512)
+    for chan in EEG_CHANNELS:
+        ax.plot(data[chan])
+    plt.draw()
+    plt.pause(0.01)
 
 board.stop_stream()
 board.release_session()
-
-
-for chan in EEG_CHANNELS:
-    plt.plot(data[chan])
-plt.show()
