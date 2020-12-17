@@ -20,19 +20,26 @@ def get_data_row():
     data = board.get_current_board_data(50)
     while len(data[CHANNEL]) == 0:
         time.sleep(0.1)
-    
     # return 2 ** max(min(11, math.floor(math.log2(max(map(abs, data[CHANNEL]))))), 40);
     mi=min(data[CHANNEL])
     ma=max(data[CHANNEL])
     res=ma
     if(abs(mi)>abs(ma)):
-        res=mi    
+        res=mi
     return res
-   
 def get_data_3():
-    return (get_data_row()+get_data_row()+get_data_row())/3;
+    return (get_data_row()+get_data_row()+get_data_row())/3
+def get_data_good():
+    res=[]
+    res.append(get_data_3())
+    res.append(get_data_3())
+    res.append(get_data_3())
+    res.append(get_data_3())
+    res.append(get_data_3())
+    res.sort()
+    return res[1]+res[3]+2*res[2]
 def get_data():
-    
+    return get_data_good()
 def stop():
     board.stop_stream()
     board.release_session()
