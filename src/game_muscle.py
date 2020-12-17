@@ -15,7 +15,6 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 BLUE = (0, 70, 225)
 
-
 sc = pygame.display.set_mode((W, H))
 clock = pygame.time.Clock()
 
@@ -29,6 +28,7 @@ y_max = H - r
 G = 800
 x_speed = 160
 max_speed = 1300
+block_width = 64
 
 running = True
 
@@ -37,18 +37,16 @@ while running:
     time.sleep(1 / FPS)
     
     delta_time = time.time() - prevtime
-    action = 0
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             running = False
         elif i.type == pygame.KEYDOWN:
             if i.key == pygame.K_UP:
-                action = 1000
-    speed = min(speed + action, 1000)
+                speed = 0.5 * max_speed
     y = min(y_max, max(y_min, y + delta_time * speed))
-    print(delta_time)
-    print(y)
-    speed -= alpha * delta_time
+    speed -= G * delta_time
+    if speed < -max_speed:
+        speed = -max_speed
     if y == y_min and speed < 0:
         if speed < -50:
             speed = -speed / 2
