@@ -11,7 +11,7 @@ import threading
 import websockets
 
 
-BOARD_ID = BoardIds.SYNTHETIC_BOARD # BRAINBIT_BOARD
+BOARD_ID = BoardIds.BRAINBIT_BOARD.value
 EEG_CHANNELS = BoardShim.get_eeg_channels(BOARD_ID)
 
 

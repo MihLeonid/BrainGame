@@ -12,8 +12,8 @@
 		<script type="text/javascript">
 			const WIDTH = 400;
 			const POINT_WIDTH = 2.5;
-			const HEIGHT = 60;
-			const POINT_HEIGHT = 5;
+			const HEIGHT = 10000;
+			const POINT_HEIGHT = 0.03;
 			const COLORS = ["red", "blue", "#ff8000", "green", "black"];
 			const MARKER_COLORS = {
 				1: "rgba(255, 0, 0, 0.2)",
@@ -50,6 +50,8 @@
 					requestAnimationFrame(redraw);
 					return;
 				}
+				
+				const avgVal = points.slice(-1)[0].values.reduce((a, b) => a + b, 0) / points[0].values.length;
 
 				canvas.width = canvas.width;
 				for(let i = 0; i < Object.keys(points[0].values).length; i++) {
@@ -58,9 +60,9 @@
 					ctx.beginPath();
 					ctx.strokeStyle = COLORS[i];
 					ctx.lineWidth = 1;
-					ctx.moveTo(0, (HEIGHT - points[0].values[graphName]) * POINT_HEIGHT);
+					ctx.moveTo(0, (HEIGHT - (points[0].values[graphName] - avgVal)) * POINT_HEIGHT);
 					for(let i = 1; i < points.length; i++) {
-						ctx.lineTo(i * POINT_WIDTH, (HEIGHT - points[i].values[graphName]) * POINT_HEIGHT);
+						ctx.lineTo(i * POINT_WIDTH, (HEIGHT - (points[i].values[graphName] - avgVal)) * POINT_HEIGHT);
 					}
 					ctx.stroke();
 				}
@@ -123,7 +125,7 @@
 				const data = JSON.parse(e.data);
 				for(const part of data) {
 					if(part.action === "push") {
-						addPoint(part.idx, part.data);
+						addPoint(part.idx, part.data.slice(0, 4));
 					}
 				}
 			});
