@@ -39,7 +39,15 @@ def get_data_good():
     res.sort()
     return (res[1]+res[3]+2*res[2])/100
 def get_data():
-    return get_data_good()
+    dt=abs(get_data_good());
+    if(dt<1.5):
+        dt/=5;
+    if(dt>10):
+        dt=(dt-10)/4+10;
+    elif(dt>7):
+        dt=(dt-7)/2+7;
+    dt=(dt-3)/2+3
+    return dt;
 def stop():
     board.stop_stream()
     board.release_session()
