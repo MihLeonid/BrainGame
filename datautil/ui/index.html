@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+	</head>
+	<body>
+		<canvas id="canv"></canvas><br>
+		<br><br><br><br>
+
+		<textarea readonly id="logarea"></textarea>
+
+		<script type="text/javascript">
+			const WIDTH = 400;
+			const POINT_WIDTH = 2.5;
+			const HEIGHT = 60;
+			const POINT_HEIGHT = 5;
+			const COLORS = ["red", "blue", "#ff8000", "green", "black"];
+			const MARKER_COLORS = {
+				1: "rgba(255, 0, 0, 0.2)",
+				2: "rgba(0, 0, 255, 0.2)",
+				3: "rgba(255, 255, 0, 0.2)",
+				4: "rgba(0, 255, 0, 0.2)",
+				5: "rgba(0, 0, 0, 0.2)",
+				6: "rgba(0, 255, 255, 0.2)",
+				7: "rgba(255, 0, 255, 0.2)",
+				8: "rgba(127, 0, 255, 0.2)",
+				9: "rgba(255, 0, 127, 0.2)",
+				0: "rgba(127, 255, 63, 0.2)"
+			};
+
+			const canvas = document.querySelector("#canv");
+			canvas.width = WIDTH * POINT_WIDTH;
+			canvas.height = 2 * HEIGHT * POINT_HEIGHT + 15;
+			const ctx = canvas.getContext("2d");
+
+			const logArea = document.querySelector("#logarea");
+
+			const points = [];
+			const markers = [];
+
+			function addPoint(pointIdx, values) {
+				points.push({pointIdx, values});
+				if(points.length > WIDTH) {
+					points.shift();
+				}
+			}
+
+			function redraw() {
+				if(points.length === 0) {
+					requestAnimationFrame(redraw);
+					return;
+				}
+
+				canvas.width = canvas.width;
+				for(let i = 0; i < Object.keys(points[0].values).length; i++) {
+					const graphName = Object.keys(points[0].values)[i];
+
+					ctx.beginPath();
+					ctx.strokeStyle = COLORS[i];
+					ctx.lineWidth = 1;
+					ctx.moveTo(0, (HEIGHT - points[0].values[graphName]) * POINT_HEIGHT);
+					for(let i = 1; i < points.length; i++) {
+						ctx.lineTo(i * POINT_WIDTH, (HEIGHT - points[i].values[graphName]) * POINT_HEIGHT);
+					}
+					ctx.stroke();
+				}
+
+				let prevPos = 0;
+				for(const marker of markers) {
+					const pos = points.indexOf(points.find(p => p.pointIdx === marker.pointIdx));
+					if(pos === -1) {
+						continue;
+					}
+
+					const x = pos * POINT_WIDTH;
+					const y = HEIGHT * POINT_HEIGHT * 2;
+					ctx.beginPath();
+					ctx.fillStyle = "black";
+					ctx.moveTo(x - 5, y + 15);
+					ctx.lineTo(x + 5, y + 15);
+					ctx.lineTo(x, y + 5);
+					ctx.closePath();
+					ctx.fill();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.moveTo(x, y + 5);
+					ctx.lineTo(x, 0);
+					ctx.stroke();
+
+					if(marker.key) {
+						ctx.beginPath();
+						ctx.fillStyle = MARKER_COLORS[marker.key];
+						ctx.fillRect(prevPos * POINT_WIDTH, 0, x - prevPos * POINT_WIDTH, y);
+						ctx.fillStyle = "black";
+						ctx.font = "16px Arial";
+						ctx.fillText(marker.key, (prevPos * POINT_WIDTH + x) / 2 - 4, y + 15);
+					}
+
+					prevPos = pos;
+				}
+
+				requestAnimationFrame(redraw);
+			}
+
+			function logMarker(start, end, key) {
+				logArea.value += `${start}--${end} ${key}\n`;
+				ws.send(JSON.stringify({action: "addMarker", start, end, key}));
+			}
+
+			document.addEventListener("keypress", e => {
+				const pointIdx = points.slice(-1)[0].pointIdx;
+				if(e.key === " ") {
+					markers.push({key: null, pointIdx});
+				} else if(("0" <= e.key && e.key <= "9") || ("a" <= e.key && e.key <= "z")) {
+					markers.push({key: e.key, pointIdx});
+					logMarker(markers.slice(-2)[0].pointIdx, pointIdx, e.key);
+				}
+			});
+
+			const ws = new WebSocket("ws://127.0.0.1:8765/");
+			ws.addEventListener("message", e => {
+				const data = JSON.parse(e.data);
+				for(const part of data) {
+					if(part.action === "push") {
+						addPoint(part.idx, part.data);
+					}
+				}
+			});
+
+			redraw();
+		</script>
+	</body>
+</html>
