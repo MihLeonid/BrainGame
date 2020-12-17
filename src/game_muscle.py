@@ -40,8 +40,8 @@ while running:
     
     
     value = device.get_data()
-    if value >= 1:
-        speed += 0.1 * value * G * delta_time
+    print(value)
+    speed += 0.334 * value * G * delta_time
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             running = False

@@ -40,8 +40,8 @@ def get_data_good():
     return (res[1]+res[3]+2*res[2])/100
 def get_data():
     dt=abs(get_data_good());
-    if(dt<1.5):
-        dt/=5;
+    if(dt<2):
+        dt/=10;
     if(dt>10):
         dt=(dt-10)/4+10;
     elif(dt>7):
