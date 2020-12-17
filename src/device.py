@@ -17,7 +17,7 @@ board.prepare_session()
 board.start_stream()
 
 def get_data_row():
-    data = board.get_current_board_data(50)
+    data = board.get_current_board_data(15)
     while len(data[CHANNEL]) == 0:
         time.sleep(0.1)
     # return 2 ** max(min(11, math.floor(math.log2(max(map(abs, data[CHANNEL]))))), 40);
@@ -37,7 +37,7 @@ def get_data_good():
     res.append(get_data_3())
     res.append(get_data_3())
     res.sort()
-    return res[1]+res[3]+2*res[2]
+    return (res[1]+res[3]+2*res[2])/100
 def get_data():
     return get_data_good()
 def stop():

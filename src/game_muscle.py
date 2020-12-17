@@ -5,7 +5,7 @@ import numpy as np
 import pygame
 
 
-#import device
+import device
 
 
 FPS = 60
@@ -37,16 +37,23 @@ while running:
     time.sleep(1 / FPS)
     
     delta_time = time.time() - prevtime
+    
+    
+    value = device.get_data()
+    if value >= 1:
+        speed += 0.1 * value * G * delta_time
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             running = False
-        elif i.type == pygame.KEYDOWN:
-            if i.key == pygame.K_UP:
-                speed = 0.3 * max_speed
+        #elif i.type == pygame.KEYDOWN:
+        #    if i.key == pygame.K_UP:
+        #        speed = 0.3 * max_speed
     y = min(y_max, max(y_min, y + delta_time * speed))
     speed -= G * delta_time
     if speed < -max_speed:
         speed = -max_speed
+    if speed > max_speed:
+        speed = max_speed
     if y == y_min and speed < 0:
         if speed < -50:
             speed = -speed / 2
@@ -60,3 +67,4 @@ while running:
     prevtime = time.time()
 
 pygame.quit()
+device.stop()
