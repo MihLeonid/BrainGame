@@ -42,7 +42,7 @@ while running:
             running = False
         elif i.type == pygame.KEYDOWN:
             if i.key == pygame.K_UP:
-                speed = 0.5 * max_speed
+                speed = 0.3 * max_speed
     y = min(y_max, max(y_min, y + delta_time * speed))
     speed -= G * delta_time
     if speed < -max_speed:
