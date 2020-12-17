@@ -7,16 +7,15 @@ import pygame
 
 import device
 
-
+# constants
 FPS = 60
-H = 720  # высота экрана
-W = 405  # ширина экрана
+H = 720
+W = 405
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 BLUE = (0, 70, 225)
 
 sc = pygame.display.set_mode((W, H))
-clock = pygame.time.Clock()
 
 speed = 0
 x = W // 2
@@ -30,6 +29,36 @@ x_speed = 160
 max_speed = 1300
 block_width = 64
 
+
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__() 
+        self.image = pygame.image.load("Sprites/Barrier.png")
+        self.surf = pygame.Surface((2 * r, 2 * r))
+        self.rect = self.surf.get_rect(center = (x, y))
+        
+    def move(self):
+        pressed_keys = pygame.key.get_pressed()
+        if pressed_keys[K_UP]:
+            self.rect.move_ip(0, -5)
+        if pressed_keys[K_DOWN]:
+            self.rect.move_ip(0,5)
+         
+        if self.rect.left > 0:
+              if pressed_keys[K_LEFT]:
+                  self.rect.move_ip(-5, 0)
+        if self.rect.right < SCREEN_WIDTH:        
+              if pressed_keys[K_RIGHT]:
+                  self.rect.move_ip(5, 0)
+
+
+class Barrier(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.image.load("Sprites/Barrier.png")
+    
+
 running = True
 
 prevtime = time.time()
@@ -40,7 +69,7 @@ while running:
     
     
     value = device.get_data()
-    print(value)
+    # print(value)
     speed += 0.334 * value * G * delta_time
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
