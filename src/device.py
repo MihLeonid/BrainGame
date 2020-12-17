@@ -18,4 +18,4 @@ def get_data():
     data = board.get_current_board_data(50)
     while len(data[CHANNEL]) == 0:
         time.sleep(0.1)
-    return 2 ** min(11, math.floor(math.log2(max(map(abs, data[CHANNEL])))));
+    return 2 ** max(min(11, math.floor(math.log2(max(map(abs, data[CHANNEL]))))), 40);
