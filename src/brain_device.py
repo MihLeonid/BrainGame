@@ -25,26 +25,27 @@ def get_some_data():
     return board.get_board_data()
 def get_data_raw():
     data=get_some_data()
-    if(len(data)==0):
-        return "none"
+    if len(data) == 0:
+        return None
     return data
 
 def get_good_data():
     global brain_time
     if(time.time()-brain_time<1):
-        return "none"
+        return None
     else:
         brain_time=time.time()
     data=get_data_raw()
-    if(data=="none"):
-        return "none"
+    if data is None:
+        return None
     sampling_rate = BoardShim.get_sampling_rate(BOARD_ID)
     nfft = DataFilter.get_nearest_power_of_two (sampling_rate)
     eeg_channels = BoardShim.get_eeg_channels (BOARD_ID)
-    result=[];
+    result=[]
     for a in range(4):
         eeg_channel = eeg_channels[a]
         DataFilter.detrend (data[eeg_channel], DetrendOperations.LINEAR.value)
+        #print(data, eeg_channel)
         psd = DataFilter.get_psd_welch (data[eeg_channel], nfft, nfft // 2, sampling_rate, WindowFunctions.BLACKMAN_HARRIS.value)
         band_power_alpha = DataFilter.get_band_power (psd, 7.0, 13.0)
         band_power_beta = DataFilter.get_band_power (psd, 14.0, 30.0)
@@ -56,7 +57,7 @@ def get_data():
     global last_data_time
     global prev_last_data_time
     data=get_good_data()
-    if(data=="none"):
+    if(data is None):
         return last_data+((last_data-prev_last_data)/(last_data_time-prev_last_data_time))*(time.time()-last_data_time)
     else:
         data=data[1][0]/50
