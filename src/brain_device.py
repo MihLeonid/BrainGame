@@ -21,26 +21,26 @@ last_data=0
 prev_last_data=0
 last_data_time=time.time()
 prev_last_data_time=time.time()
+
 def get_some_data():
     return board.get_board_data()
-def get_data_raw():
-    data=get_some_data()
-    if(len(data)==0):
-        return "none"
-    return data
 
 def get_good_data():
     global brain_time
     if(time.time()-brain_time<1):
-        return "none"
+        return []
     else:
         brain_time=time.time()
-    data=get_data_raw()
-    if(data=="none"):
-        return "none"
+    
     sampling_rate = BoardShim.get_sampling_rate(BOARD_ID)
     nfft = DataFilter.get_nearest_power_of_two (sampling_rate)
     eeg_channels = BoardShim.get_eeg_channels (BOARD_ID)
+
+    data = get_some_data()
+    while len(data[0]) <= nfft:
+        time.sleep(0.1)
+        data = np.hstack((data, get_some_data()))
+
     result=[];
     for a in range(4):
         eeg_channel = eeg_channels[a]
@@ -55,7 +55,7 @@ def get_data():
     #global prev_last_data
     #global last_data_time
     #global prev_last_data_time
-    #data=get_good_data()
+    data=get_good_data()
     #if(data=="none"):
         #return last_data+((last_data-prev_last_data)/(last_data_time-prev_last_data_time))*(time.time()-last_data_time)
     #else:
@@ -65,10 +65,7 @@ def get_data():
         #last_data=data
         #last_data_time=time.time()
         #return data
-    if(data=="none"):
-        return [];
-    else:
-        return data;
+    return [] if data is None else data
 def stop():
     board.stop_stream()
     board.release_session()
