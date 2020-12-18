@@ -16,6 +16,11 @@ brain_time=time.time()
 board = BoardShim (BOARD_ID, params)
 board.prepare_session()
 board.start_stream()
+
+last_data=0
+prev_last_data=0
+last_data_time=time.time()
+prev_last_data_time=time.time()
 def get_some_data():
     return board.get_board_data()
 def get_data_raw():
@@ -46,11 +51,20 @@ def get_good_data():
         result.append([band_power_alpha, band_power_beta])
     return result
 def get_data():
+    global last_data
+    global prev_last_data
+    global last_data_time
+    global prev_last_data_time
     data=get_good_data()
     if(data=="none"):
-        return []
+        return last_data+((last_data-prev_last_data)/(last_data_time-prev_last_data_time))*(time.time()-last_data_time)
     else:
-        return data;
+        data=data[1][0]/50
+        prev_last_data=last_data
+        prev_last_data_time=last_data_time
+        last_data=data
+        last_data_time=time.time()
+        return data
 def stop():
     board.stop_stream()
     board.release_session()
