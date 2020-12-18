@@ -45,7 +45,7 @@ my_font = pygame.font.SysFont("Comic Sans MS", 50, italic=True)
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load("Sprites/Bird.png")
+        self.image = pygame.image.load("../assets/Sprites/Bird.png")
         self.surf = pygame.Surface((2 * r, 2 * r))
         self.rect = self.surf.get_rect(center = (W // 2, H // 2))
         self.speed = 0
@@ -80,7 +80,7 @@ class Barrier(pygame.sprite.Sprite):
     def __init__(self):
         global up_down_cnt
         super().__init__()
-        self.image = pygame.image.load("Sprites/Barrier.png")
+        self.image = pygame.image.load("../assets/Sprites/Barrier.png")
         self.surf = pygame.Surface((block_width, H))
         self.x = 3 * W // 2
         self.y = int((-H/2+(H/DIFFICULTY_STEPS)*random.randint(MIN_DIFFICULTY, DIFFICULTY)))
