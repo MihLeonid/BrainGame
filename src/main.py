@@ -1,1 +1,1 @@
-import muscle_log
+import game_muscle

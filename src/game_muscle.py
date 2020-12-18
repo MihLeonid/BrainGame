@@ -6,12 +6,18 @@ import pygame
 import random
 from pygame.locals import *
 
-import device
+import synthetic_device as device
 
 # constants
 FPS = 60
 H = 720
 W = 405
+
+MIN_DIFFICULTY = 10;
+DIFFICULTY = 54;
+DIFFICULTY_STEPS = 100;
+spawn_period = 3
+
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 BLUE = (0, 70, 225)
@@ -30,7 +36,6 @@ max_speed = 1300
 
 x_speed = 160
 block_width = 64
-spawn_period = 2.5
 
 
 pygame.font.init()
@@ -76,15 +81,14 @@ class Barrier(pygame.sprite.Sprite):
         self.image = pygame.image.load("Sprites/Barrier.png")
         self.surf = pygame.Surface((block_width, H))
         self.x = 3 * W // 2
+        self.y = int((-H/2+(H/DIFFICULTY_STEPS)*random.randint(MIN_DIFFICULTY, DIFFICULTY)))
         if random.randint(0, 1) == 0:
-            self.y = H + random.randint(-H // 4, H // 4)
-        else:
-            self.y = random.randint(-H // 4, H // 4)
+            self.y=H-self.y;
         self.rect = self.surf.get_rect(center = (self.x, self.y))
     
     def move(self, delta_x):
         self.x += delta_x
-        self.rect = self.surf.get_rect(center = (int(self.x), int(H - self.y)))
+        self.rect = self.surf.get_rect(center = (int(self.x), int(self.y)))
     
     def draw(self, surface):
         surface.blit(self.image, self.rect)

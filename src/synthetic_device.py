@@ -4,7 +4,7 @@ from brainflow.data_filter import DataFilter, FilterTypes, AggOperations
 import time
 import math
 
-BOARD_ID = 10 # BoardIds.SYNTHETIC_BOARD # BRAINBIT_BOARD
+BOARD_ID = BoardIds.SYNTHETIC_BOARD.value # BoardIds.SYNTHETIC_BOARD # BRAINBIT_BOARD
 CHANNEL = 1
 
 params = BrainFlowInputParams()
@@ -17,7 +17,7 @@ board.prepare_session()
 board.start_stream()
 
 def get_data_row():
-    data = board.get_current_board_data(15)
+    data = board.get_current_board_data(1)
     while len(data[CHANNEL]) == 0:
         time.sleep(0.1)
     # return 2 ** max(min(11, math.floor(math.log2(max(map(abs, data[CHANNEL]))))), 40);
@@ -26,7 +26,7 @@ def get_data_row():
     res=ma
     if(abs(mi)>abs(ma)):
         res=mi
-    return res
+    return res**7/7.5**7
 def get_data_3():
     return (get_data_row()+get_data_row()+get_data_row())/3
 def get_data_good():
