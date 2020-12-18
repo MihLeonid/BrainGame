@@ -13,6 +13,7 @@ while True:
     #out.write(str(device.get_data())+ '\n')
     data=device.get_data()
     if(True):
-        print(data)
+        #print(data)
+        pass;
 
 device.stop();

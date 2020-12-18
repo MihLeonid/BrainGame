@@ -11,7 +11,7 @@ import brain_device as device
 # constants
 FPS = 60
 H = 720
-W = 405
+W = 720
 
 MIN_DIFFICULTY = 10;
 DIFFICULTY = 54;
@@ -123,7 +123,6 @@ while running:
         barriers.append(Barrier())
 
     value = device.get_data()
-    print(value)
     player.add_speed(0.334 * value * G * delta_time)
     for i in pygame.event.get():
         if i.type == pygame.QUIT:

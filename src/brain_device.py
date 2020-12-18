@@ -24,24 +24,31 @@ prev_last_data_time=time.time()
 def get_some_data():
     return board.get_board_data()
 
+history_data=None
+
 def get_good_data():
+    global history_data
     sampling_rate = BoardShim.get_sampling_rate(BOARD_ID)
     nfft = DataFilter.get_nearest_power_of_two (sampling_rate)
     eeg_channels = BoardShim.get_eeg_channels (BOARD_ID)
 
-    data = get_some_data()
-    while len(data[0]) <= nfft:
-        time.sleep(0.1)
-        data = np.hstack((data, get_some_data()))
+    if history_data is None:
+        history_data = get_some_data()
+    
+    history_data = np.hstack((history_data, get_some_data()))
+    if len(history_data[0]) <= nfft:
+        return None
 
     result=[];
     for a in range(4):
         eeg_channel = eeg_channels[a]
-        DataFilter.detrend (data[eeg_channel], DetrendOperations.LINEAR.value)
-        psd = DataFilter.get_psd_welch (data[eeg_channel], nfft, nfft // 2, sampling_rate, WindowFunctions.BLACKMAN_HARRIS.value)
-        band_power_alpha = DataFilter.get_band_power (psd, 7.0, 13.0)
-        band_power_beta = DataFilter.get_band_power (psd, 14.0, 30.0)
-        result.append([band_power_alpha, band_power_beta])
+        DataFilter.detrend (history_data[eeg_channel], DetrendOperations.LINEAR.value)
+        psd = DataFilter.get_psd_welch (history_data[eeg_channel], nfft, nfft // 2, sampling_rate, WindowFunctions.BLACKMAN_HARRIS.value)
+        #band_power_alpha = DataFilter.get_band_power (psd, 7.0, 13.0)
+        band_power_uni = DataFilter.get_band_power (psd, 5.0, 11.0)
+        #band_power_beta = DataFilter.get_band_power (psd, 14.0, 30.0)
+        result.append(band_power_uni)
+    history_data=None
     return result
 def get_data():
     global last_data
@@ -50,9 +57,12 @@ def get_data():
     global prev_last_data_time
     data=get_good_data()
     if(data is None):
+        if(last_data_time==prev_last_data_time):
+            return 0
         return last_data+((last_data-prev_last_data)/(last_data_time-prev_last_data_time))*(time.time()-last_data_time)
     else:
-        data=data[1][0]
+        data=sum(data)/100
+        print(data);
         prev_last_data=last_data
         prev_last_data_time=last_data_time
         last_data=data
