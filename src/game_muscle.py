@@ -26,6 +26,7 @@ RED = (157, 78, 0)
 sc = pygame.display.set_mode((W, H))
 
 hurt_cnt = 0
+up_down_cnt = 0
 
 r = 16
 y_min = r
@@ -77,13 +78,21 @@ class Player(pygame.sprite.Sprite):
 
 class Barrier(pygame.sprite.Sprite):
     def __init__(self):
+        global up_down_cnt
         super().__init__()
         self.image = pygame.image.load("Sprites/Barrier.png")
         self.surf = pygame.Surface((block_width, H))
         self.x = 3 * W // 2
         self.y = int((-H/2+(H/DIFFICULTY_STEPS)*random.randint(MIN_DIFFICULTY, DIFFICULTY)))
-        if random.randint(0, 1) == 0:
+        if (up_down_cnt==2)or(up_down_cnt==-2 and random.randint(0, 1) == 0):
             self.y=H-self.y;
+            if(up_down_cnt>0):
+                up_down_cnt=0;
+            up_down_cnt-=1
+        else:
+            if(up_down_cnt<0):
+                up_down_cnt=0;
+            up_down_cnt+=1;
         self.rect = self.surf.get_rect(center = (self.x, self.y))
     
     def move(self, delta_x):

@@ -16,10 +16,13 @@ board = BoardShim(BOARD_ID, params)
 board.prepare_session()
 board.start_stream()
 
+def get_some_data():
+    return board.get_current_board_data(15)
 def get_data_row():
-    data = board.get_current_board_data(1)
+    data = get_some_data()
     while len(data[CHANNEL]) == 0:
         time.sleep(0.1)
+        data = get_some_data()
     # return 2 ** max(min(11, math.floor(math.log2(max(map(abs, data[CHANNEL]))))), 40);
     mi=min(data[CHANNEL])
     ma=max(data[CHANNEL])
