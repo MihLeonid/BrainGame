@@ -44,21 +44,21 @@ my_font = pygame.font.SysFont("Comic Sans MS", 50, italic=True)
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
-        super().__init__() 
+        super().__init__()
         self.image = pygame.image.load("Sprites/Bird.png")
         self.surf = pygame.Surface((2 * r, 2 * r))
         self.rect = self.surf.get_rect(center = (W // 2, H // 2))
         self.speed = 0
         self.x = W // 2
         self.y = H // 2
-    
+
     def add_speed(self, addition):
         self.speed += addition
         if self.speed < -max_speed:
             self.speed = -max_speed
         if self.speed > max_speed:
             self.speed = max_speed
-    
+
     def move(self, delta_y):
         new_y = self.y + delta_y
         if new_y <= y_min:
@@ -71,7 +71,7 @@ class Player(pygame.sprite.Sprite):
                 self.speed = -self.speed / 2
         self.y = new_y
         self.rect = self.surf.get_rect(center = (W // 2, int(H - self.y)))
-    
+
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
@@ -94,11 +94,11 @@ class Barrier(pygame.sprite.Sprite):
                 up_down_cnt=0;
             up_down_cnt+=1;
         self.rect = self.surf.get_rect(center = (self.x, self.y))
-    
+
     def move(self, delta_x):
         self.x += delta_x
         self.rect = self.surf.get_rect(center = (int(self.x), int(self.y)))
-    
+
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
@@ -115,13 +115,13 @@ last_hurt = start_time - hurt_offset
 
 while running:
     time.sleep(1 / FPS)
-    
+
     cur_time = time.time()
     delta_time = cur_time - prevtime
     if cur_time >= last_spawn + spawn_period:
         last_spawn = cur_time
         barriers.append(Barrier())
-    
+
     value = device.get_data()
     print(value)
     player.add_speed(0.334 * value * G * delta_time)
@@ -151,7 +151,7 @@ while running:
     sc.blit(text_surface, (0, 0))
     pygame.display.update()
     prevtime = time.time()
-    
+
 
 pygame.quit()
 device.stop()
