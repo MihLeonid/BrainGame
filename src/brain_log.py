@@ -12,7 +12,7 @@ while True:
     time.sleep(0.2)
     #out.write(str(device.get_data())+ '\n')
     data=device.get_data()
-    if(len(data)>0):
+    if(True):
         print(data)
 
 device.stop();

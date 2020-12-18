@@ -11,7 +11,6 @@ params = BrainFlowInputParams ()
 params.timeout = 15
 BoardShim.enable_dev_board_logger ()
 
-brain_time=time.time()
 
 board = BoardShim (BOARD_ID, params)
 board.prepare_session()
@@ -26,12 +25,6 @@ def get_some_data():
     return board.get_board_data()
 
 def get_good_data():
-    global brain_time
-    if(time.time()-brain_time<1):
-        return []
-    else:
-        brain_time=time.time()
-    
     sampling_rate = BoardShim.get_sampling_rate(BOARD_ID)
     nfft = DataFilter.get_nearest_power_of_two (sampling_rate)
     eeg_channels = BoardShim.get_eeg_channels (BOARD_ID)
@@ -51,20 +44,20 @@ def get_good_data():
         result.append([band_power_alpha, band_power_beta])
     return result
 def get_data():
-    #global last_data
-    #global prev_last_data
-    #global last_data_time
-    #global prev_last_data_time
+    global last_data
+    global prev_last_data
+    global last_data_time
+    global prev_last_data_time
     data=get_good_data()
-    #if(data=="none"):
-        #return last_data+((last_data-prev_last_data)/(last_data_time-prev_last_data_time))*(time.time()-last_data_time)
-    #else:
-        #data=data[1][0]/50
-        #prev_last_data=last_data
-        #prev_last_data_time=last_data_time
-        #last_data=data
-        #last_data_time=time.time()
-        #return data
+    if(data is None):
+        return last_data+((last_data-prev_last_data)/(last_data_time-prev_last_data_time))*(time.time()-last_data_time)
+    else:
+        data=data[1][0]
+        prev_last_data=last_data
+        prev_last_data_time=last_data_time
+        last_data=data
+        last_data_time=time.time()
+        return data
     return [] if data is None else data
 def stop():
     board.stop_stream()
