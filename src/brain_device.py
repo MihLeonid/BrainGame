@@ -40,7 +40,7 @@ def get_good_data():
         return None
 
     result=[]
-    new_data[]
+    new_data=[]
     for a in range(4):
         eeg_channel = eeg_channels[a]
         DataFilter.detrend (history_data[eeg_channel], DetrendOperations.LINEAR.value)
@@ -50,8 +50,8 @@ def get_good_data():
         band_power_theta = DataFilter.get_band_power (psd, 3.0, 7.0)
         #band_power_beta = DataFilter.get_band_power (psd, 14.0, 30.0)
         result.append(band_power_theta)
-        new_data.append([band_power_theta, band_power_theta_alpha, band_power_alpha]
-    print(new_data)
+        new_data.append([band_power_theta, band_power_theta_alpha, band_power_alpha])
+    #print(new_data)
     history_data=None
     return result
 def get_data():
