@@ -10,8 +10,8 @@ import muscle_device as device
 
 # constants
 FPS = 60
-H = 900
-W = 1600
+H = 720
+W = 1280
 
 MIN_DIFFICULTY = 10;
 DIFFICULTY = 54;
