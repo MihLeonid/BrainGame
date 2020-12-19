@@ -20,9 +20,7 @@ print("Session ID:", session_id)
 
 markers = []
 markers_filename = "data/" + session_id + ".json"
-data_filename = "data/" + session_id + ".raw"
-
-data_f = open(data_filename, "wb")
+data_filename = "data/" + session_id + ".csv"
 
 alive_sockets = []
 
@@ -56,7 +54,7 @@ BoardShim.enable_dev_board_logger()
 
 board = BoardShim(BOARD_ID, params)
 board.prepare_session()
-board.start_stream()
+board.start_stream(streamer_params="file://" + data_filename + ":w")
 
 data_index = 0
 while True:
@@ -68,7 +66,6 @@ while True:
     to_send = []
     for item in zip(*[data[chan] for chan in EEG_CHANNELS]):
         cur_data = item[:4]
-        data_f.write(struct.pack("<dddd", *cur_data))
         to_send.append({"action": "push", "idx": data_index, "data": cur_data})
         data_index += 1
 
