@@ -17,7 +17,7 @@ board.prepare_session()
 board.start_stream()
 
 def get_data_row():
-    data = board.get_current_board_data(15)
+    data = board.get_current_board_data(5)
     #data = board.get_board_data()
     while len(data[CHANNEL]) == 0:
         time.sleep(0.1)
