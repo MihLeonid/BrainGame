@@ -6,7 +6,7 @@ import pygame
 import random
 from pygame.locals import *
 
-import muscle_device as device
+import brain_device as device
 
 # constants
 FPS = 60
