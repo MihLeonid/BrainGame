@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import random
 import brainflow
 from brainflow.board_shim import BoardShim, BrainFlowInputParams, LogLevels, BoardIds
 from brainflow.data_filter import DataFilter, FilterTypes, AggOperations, WindowFunctions, DetrendOperations
@@ -12,9 +13,13 @@ params.timeout = 15
 BoardShim.enable_dev_board_logger ()
 
 
+session_id = "brain-" + "".join(random.choice("abcdefghijklmnopqrstuvwxyz") for _ in range(10))
+print("Session ID:", session_id)
+data_filename = "data/" + session_id + ".csv"
+
 board = BoardShim (BOARD_ID, params)
 board.prepare_session()
-board.start_stream()
+board.start_stream(streamer_params="file://" + data_filename + ":w")
 
 last_data=0
 prev_last_data=0
