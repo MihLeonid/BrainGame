@@ -34,20 +34,24 @@ def get_good_data():
 
     if history_data is None:
         history_data = get_some_data()
-    
+
     history_data = np.hstack((history_data, get_some_data()))
     if len(history_data[0]) <= nfft:
         return None
 
-    result=[];
+    result=[]
+    new_data[]
     for a in range(4):
         eeg_channel = eeg_channels[a]
         DataFilter.detrend (history_data[eeg_channel], DetrendOperations.LINEAR.value)
         psd = DataFilter.get_psd_welch (history_data[eeg_channel], nfft, nfft // 2, sampling_rate, WindowFunctions.BLACKMAN_HARRIS.value)
-        #band_power_alpha = DataFilter.get_band_power (psd, 7.0, 13.0)
-        band_power_uni = DataFilter.get_band_power (psd, 5.0, 11.0)
+        band_power_alpha = DataFilter.get_band_power (psd, 7.0, 13.0)
+        band_power_theta_alpha = DataFilter.get_band_power (psd, 5.0, 11.0)
+        band_power_theta = DataFilter.get_band_power (psd, 3.0, 7.0)
         #band_power_beta = DataFilter.get_band_power (psd, 14.0, 30.0)
-        result.append(band_power_uni)
+        result.append(band_power_theta)
+        new_data.append([band_power_theta, band_power_theta_alpha, band_power_alpha]
+    print(new_data)
     history_data=None
     return result
 def get_data():
@@ -68,7 +72,6 @@ def get_data():
         last_data=data
         last_data_time=time.time()
         return data
-    return [] if data is None else data
 def stop():
     board.stop_stream()
     board.release_session()
