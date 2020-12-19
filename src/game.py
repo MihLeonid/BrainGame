@@ -6,12 +6,12 @@ import pygame
 import random
 from pygame.locals import *
 
-import brain_device as device
+import muscle_device as device
 
 # constants
 FPS = 60
-H = 720
-W = 720
+H = 900
+W = 1600
 
 MIN_DIFFICULTY = 10;
 DIFFICULTY = 54;
@@ -21,22 +21,22 @@ spawn_period = 3
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 BLUE = (0, 70, 225)
-RED = (157, 78, 0)
+RED = (157, 0, 121)
 
 sc = pygame.display.set_mode((W, H))
 
 hurt_cnt = 0
 up_down_cnt = 0
 
-r = 16
+r = 32
 y_min = r
 y_max = H - r
 
 G = 800
 max_speed = 1300
 
-x_speed = 160
-block_width = 64
+x_speed = 200
+block_width = 128
 
 
 pygame.font.init()
@@ -124,6 +124,7 @@ while running:
 
     value = device.get_data()
     player.add_speed(0.334 * value * G * delta_time)
+    print(value)
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             running = False
@@ -143,9 +144,6 @@ while running:
         if cur_time > last_hurt + hurt_offset:
             hurt_cnt += 1
             last_hurt = cur_time
-            #if lives == 0:
-            #    sc.fill(RED)
-            #    running = False
     text_surface = my_font.render(str(hurt_cnt), False, RED)
     sc.blit(text_surface, (0, 0))
     pygame.display.update()
