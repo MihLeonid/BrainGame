@@ -8,6 +8,9 @@ from pygame.locals import *
 
 import brain_device as device
 
+SEED = 1337
+random.seed(SEED)
+
 # constants
 FPS = 60
 H = 720

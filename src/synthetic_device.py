@@ -1,10 +1,12 @@
 import brainflow
 from brainflow.board_shim import BoardShim, BrainFlowInputParams, BoardIds
 from brainflow.data_filter import DataFilter, FilterTypes, AggOperations
+import random
 import time
+import sys
 import math
 
-BOARD_ID = BoardIds.SYNTHETIC_BOARD.value # BoardIds.SYNTHETIC_BOARD # BRAINBIT_BOARD
+BOARD_ID=BoardIds.SYNTHETIC_BOARD.value
 CHANNEL = 1
 
 params = BrainFlowInputParams()
@@ -12,9 +14,20 @@ params.timeout = 15  # discovery timeout (seconds)
 
 BoardShim.enable_dev_board_logger()
 
-board = BoardShim(BOARD_ID, params)
-board.prepare_session()
-board.start_stream()
+if len(sys.argv) == 1:
+    session_id = "synthetic-" + "".join(random.choice("abcdefghijklmnopqrstuvwxyz") for _ in range(10))
+    print("Session ID:", session_id)
+    data_filename = "data/" + session_id + ".csv"
+    board = BoardShim(BOARD_ID, params)
+    board.prepare_session()
+    board.start_stream(streamer_params="file://" + data_filename + ":w")
+else:
+    params.other_info = str(BOARD_ID)
+    session_id = sys.argv[1].replace(".csv", "").replace(".json", "").replace("data/", "")
+    params.file = "data/" + session_id + ".csv"
+    board = BoardShim(BoardIds.PLAYBACK_FILE_BOARD.value, params)
+    board.prepare_session()
+    board.start_stream()
 
 def get_some_data():
     return board.get_current_board_data(15)
