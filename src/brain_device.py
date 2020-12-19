@@ -74,9 +74,6 @@ def get_good_data():
     new_data=[tsum, osum]
     #print(new_data, end=" ")
     #result=new_data
-        #band_power_beta = DataFilter.get_band_power (psd, 14.0, 30.0)
-        result.append(band_power_theta)
-        new_data.append([band_power_theta, band_power_theta_alpha, band_power_alpha])
     #print(new_data)
     history_data=None
     return result
