@@ -113,7 +113,9 @@ def get_data():
         data=sum(theta_alpha)/100
         data*=20
         delta_theta=sum(delta_theta)/100
-        delta_theta*=1.2
+        delta_theta*=2.5
+        if(delta_theta>2):
+            delta_theta=(delta_theta-3)/4+3
         print(data, delta_theta)
         data=delta_theta
         prev_last_data=last_data
