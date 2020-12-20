@@ -57,6 +57,8 @@ def get_good_data():
     tsub=0
     osum=0
     osub=0
+    delta_theta=[]
+    theta_alpha=[]
     for a in range(4):
         eeg_channel = eeg_channels[a]
         DataFilter.detrend (history_data[eeg_channel], DetrendOperations.LINEAR.value)
@@ -82,13 +84,14 @@ def get_good_data():
             osum+=power
             osub-=power
         #result.append([power, band_power_theta, band_power_theta_alpha])
-        result.append(band_power_theta_alpha)
-    new_data=[tsum, osum]
-    #print(new_data, end=" ")
+        delta_theta.append(band_power_delta_theta)
+        theta_alpha.append(band_power_theta_alpha)
+    new_data=[tsum, osum, tsub, osub]
+    print(new_data, end=" ")
     #result=new_data
     #print(new_data)
     history_data=None
-    return result
+    return [delta_theta, theta_alpha]
 def get_data():
     global last_data
     global prev_last_data
@@ -100,9 +103,13 @@ def get_data():
             return 0
         return last_data+((last_data-prev_last_data)/(last_data_time-prev_last_data_time))*(time.time()-last_data_time)
     else:
-        data=sum(data)/100
+        delta_theta=data[0]
+        theta_alpha=data[1]
+        data=sum(theta_alpha)/100
         data*=20
-        print(data)
+        delta_theta=sum(delta_theta)/100
+        delta_theta*=1.2
+        print(data, delta_theta)
         #data=sum(data)/2000;
         #print(data, end=" ")
         #if data<0.8:
