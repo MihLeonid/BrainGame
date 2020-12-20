@@ -126,14 +126,15 @@ while running:
         barriers.append(Barrier())
 
     value = device.get_data()
-    player.add_speed(0.334 * value * G * delta_time)
+    #player.add_speed(0.334 * value * G * delta_time)
+    player.move(value*delta_time*G/3)
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             running = False
         #elif i.type == pygame.KEYDOWN:
         #    if i.key == pygame.K_UP:
         #        player.add_speed(17 * G * delta_time)
-    player.add_speed(-G * delta_time)
+    #player.add_speed(-G * delta_time)
     player.move(player.speed * delta_time)
     sc.fill(WHITE)
     player.draw(sc)
