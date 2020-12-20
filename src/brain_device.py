@@ -96,7 +96,6 @@ def get_good_data():
     #result=new_data
     #print(new_data)
     history_data=None
-    return [new_data, lambda_sum]
     return [delta_theta, theta_alpha]
 def get_data():
     global last_data
@@ -109,33 +108,14 @@ def get_data():
             return 0
         return last_data+((last_data-prev_last_data)/(last_data_time-prev_last_data_time))*(time.time()-last_data_time)
     else:
-        lambda_sum=data[1]/10
-        data=data[0]
-        #delta_theta=data[0]
-        #theta_alpha=data[1]
-        #data=sum(theta_alpha)/100
-        #data*=20
-        #delta_theta=sum(delta_theta)/100
-        #delta_theta*=1.2
-        #print(data, delta_theta)
-        data=sum(data)/2000;
-        print(lambda_sum, data)
-        answer=0
-        if data<2.2 and lambda_sum>19.8:
-            answer=-1
-        if data<0.8:
-            data=0
-        if 0.8<=data<=2.7:
-            data=-1
-            if answer!=-1:
-                answer=1
-        if 2.7<data<20:
-            data=1
-            if answer!=-1:
-                answer=1
-        if data>=20:
-            data=0
-        data=answer
+        delta_theta=data[0]
+        theta_alpha=data[1]
+        data=sum(theta_alpha)/100
+        data*=20
+        delta_theta=sum(delta_theta)/100
+        delta_theta*=1.2
+        print(data, delta_theta)
+        data=delta_theta
         prev_last_data=last_data
         prev_last_data_time=last_data_time
         last_data=data
