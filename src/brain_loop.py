@@ -5,9 +5,8 @@ import numpy as np
 
 import brain_device as device
 
-running = True
-
 device.start()
+
 while True:
     time.sleep(0.2)
     device.get_data()
