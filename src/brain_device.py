@@ -1,7 +1,11 @@
-#BEFORE IMPORTING THIS FILE IMPORT SOME ANALYSIS as analysis !!!
+import analysis.three_state_eyes as analysis
+#IMPORTING THIS FILE IMPORT RIGHT ANALYSIS as analysis !!!
+import pygame
+import mne
+import random
+import threading
 import time
 import numpy as np
-import random
 import brainflow
 import sys
 from brainflow.board_shim import BoardShim, BrainFlowInputParams, LogLevels, BoardIds
@@ -9,7 +13,7 @@ from brainflow.data_filter import DataFilter, FilterTypes, AggOperations, Window
 
 
 # CONSTANTS
-BOARD_ID=BoardIds.SYNTETIC_BOARD.value
+BOARD_ID=BoardIds.SYNTHETIC_BOARD.value
 
 #OFFSET = 0.2
 OFFSET = 0
@@ -28,7 +32,7 @@ WAVES = {
     "alpha_beta": ("αβ", ("T3", "T4", "O1", "O2"), 100, (12.5 - OFFSET, 20 - OFFSET)),
     #"alpha": ("α", ("O1", "O2"), 100, (7 - OFFSET, 13 - OFFSET)),
     "kappa": ("κ", ("T3", "T4", "O1", "O2"), 100, (8 - OFFSET, 13 - OFFSET)),
-    "lambda": ("λ", ("O1", "O2"), 100, (12 - OFFSET, 14 - OFFSET))
+    "lambda": ("λ", ("O1", "O2"), 100, (12 - OFFSET, 14 - OFFSET)),
     "lambda*": ("λ*", ("T3", "T4", "O1", "O2"), 100, (3.8 - OFFSET, 4.8 - OFFSET))
 }
 eeg_channels = BoardShim.get_eeg_channels(BOARD_ID)
@@ -40,39 +44,35 @@ RNFFT = NFFT + BUGGY_BRAINFLOW
 MAX_DATA = RNFFT
 MAX_POWER = 5
 
-#PLAYBACK
-if len(sys.argv) == 1:
-    session_id = "brain-" + "".join(random.choice("abcdefghijklmnopqrstuvwxyz") for _ in range(10))
-    print("Session ID:", session_id)
-    data_filename = "data/" + session_id + ".csv"
-    board = BoardShim(BOARD_ID, params)
-    board.prepare_session()
-    board.start_stream(streamer_params="file://" + data_filename + ":w")
-else:
-    params.other_info = str(BOARD_ID)
-    session_id = sys.argv[1].replace(".csv", "").replace(".json", "").replace("data/", "")
-    params.file = "data/" + session_id + ".csv"
-    board = BoardShim(BoardIds.PLAYBACK_FILE_BOARD.value, params)
-    board.prepare_session()
-    board.start_stream()
-
-
 #INFORMATION GATHERING
-history_data=None
+board = None
+history_data = None
 hist_band_power = {wave: [] for wave in WAVES.keys()}
 ready = False
 def information_gathering():
     global history_data
     global hist_band_power
     global ready
+    global board
 
     params = BrainFlowInputParams()
     params.timeout = 15
     BoardShim.enable_dev_board_logger()
 
-    board = BoardShim(BOARD_ID, params)
-    board.prepare_session()
-    board.start_stream()
+    if len(sys.argv) == 1:
+        session_id = "brain-" + "".join(random.choice("abcdefghijklmnopqrstuvwxyz") for _ in range(10))
+        print("Session ID:", session_id)
+        data_filename = "data/" + session_id + ".csv"
+        board = BoardShim(BOARD_ID, params)
+        board.prepare_session()
+        board.start_stream(streamer_params="file://" + data_filename + ":w")
+    else:
+        params.other_info = str(BOARD_ID)
+        session_id = sys.argv[1].replace(".csv", "").replace(".json", "").replace("data/", "")
+        params.file = "data/" + session_id + ".csv"
+        board = BoardShim(BoardIds.PLAYBACK_FILE_BOARD.value, params)
+        board.prepare_session()
+        board.start_stream()
 
     while True:
         data = board.get_board_data()
@@ -82,7 +82,10 @@ def information_gathering():
                 history_data = eeg_data
             else:
                 history_data = np.hstack((history_data, eeg_data))
-                history_data = np.array([history_data[chan, -MAX_DATA:] for chan in eeg_channels])
+            history_data_tmp = []
+            for row in history_data:
+                history_data_tmp.append(row[-MAX_DATA:])
+            history_data = np.array(history_data_tmp)
             if history_data is not None and len(history_data[0]) >= RNFFT:
                 psds = []
                 for row in history_data:
@@ -92,7 +95,8 @@ def information_gathering():
                 for i, (wave, (symbol, zones, limit, (l, r))) in enumerate(WAVES.items()):
                     band_power = dict()
                     for zone in zones:
-                        band_power[zone] = DataFilter.get_band_power(psds[ZONE_ORDER.index(zone)], l, r)
+                        if zone in ZONE_ORDER:
+                            band_power[zone] = DataFilter.get_band_power(psds[ZONE_ORDER.index(zone)], l, r)
                     hist_band_power[wave].append(band_power)
                     hist_band_power[wave] = hist_band_power[wave][-MAX_POWER:]
                     if len(hist_band_power[wave]) == MAX_POWER:
@@ -121,10 +125,68 @@ def start():
     threading.Thread(target=information_gathering, daemon=True).start()
 
 def stop():
+    global board
     board.stop_stream()
     board.release_session()
 
-def graph():
-    pass
+SPHERE = 0.1
+def animation():
+    global hist_band_power
+    import matplotlib.pyplot as plt
+    from matplotlib.animation import FuncAnimation
+    import matplotlib.gridspec as gridspec
+
+    info = mne.create_info(ch_names=ZONE_ORDER, sfreq=sampling_rate, ch_types=["eeg"] * len(ZONE_ORDER))
+    info.set_montage(mne.channels.make_standard_montage("standard_1020"))
+
+    fig = plt.figure()
+    outer = gridspec.GridSpec(nrows=1, ncols=1 + len(WAVES), wspace=0.2, hspace=0.2)
+
+    inner_axs = []
+    for i in range(1 + len(WAVES)):
+        inner_axs.append([])
+        cnt = 2 if i > 0 else 1
+        inner = gridspec.GridSpecFromSubplotSpec(cnt, 1, subplot_spec=outer[i], wspace=0.1, hspace=0.1)
+        for j in range(cnt):
+            ax = plt.Subplot(fig, inner[j])
+            fig.add_subplot(ax)
+            if i > 0 and j == 0:
+                ax.set_title(list(WAVES.values())[i - 1][0], fontsize=40)
+            inner_axs[i].append(ax)
+            ax.plot()
+
+    def animate(frame):
+        global ready
+        if ready:
+            for i, row in enumerate(inner_axs):
+                for j, ax in enumerate(row):
+                    ax.cla()
+                    if i > 0 and j == 0:
+                        ax.set_title(list(WAVES.values())[i - 1][0], fontsize=40)
+            mne.viz.plot_topomap(np.array([sum([hist_band_power[i][-1][zone] if zone in hist_band_power[i][-1] else 0 for i in WAVES.keys()]) for zone in ZONE_ORDER]), pos=info, contours=0, axes=inner_axs[0][0], show=False, sphere=SPHERE)
+            for i, (wave, (symbol, zones, limit, (l, r))) in enumerate(WAVES.items()):
+                band_power = hist_band_power[wave][-1]
+                mne.viz.plot_topomap(np.array([band_power[zone] if zone in zones else 0 for zone in ZONE_ORDER]), pos=info, vmin=0, vmax=limit, contours=0, axes=inner_axs[1 + i][0], show=False, sphere=SPHERE)
+                inner_axs[1 + i][1].set_ylim(0, max(limit, max([max(elem.values()) if len(elem) else 0 for elem in hist_band_power[wave]])))
+                inner_axs[1 + i][1].plot([sum(elem.values())/len(elem.values()) if len(elem.values()) else 0 for elem in hist_band_power[wave]])
+                print(wave, band_power)
+            print()
+
+            """
+            sig_fft[np.abs(sample_freq) > sample_freq[10]] = 0
+            sig_fft[0] = 0
+            y_values = fftpack.ifft(sig_fft)[4:-4]
+            x_values = list(range(len(y_values)))
+            plt.ylim(..., ...)
+            plt.plot(x_values, y_values)
+            """
+
+            plt.pause(0.01)
+
+
+    ani = FuncAnimation(plt.gcf(), animate, 1000)
+    plt.show()
 if __name__ == "__main__":
-    SPHERE = 0.1
+    start()
+    animation()
+    stop()
