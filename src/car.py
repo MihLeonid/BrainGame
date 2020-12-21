@@ -60,6 +60,18 @@ class Player(pygame.sprite.Sprite):
         if self.rect.x < 0:
             self.rect.x += W // 3
 
+    def set_state(slef, kak):
+        if kak == -1:
+            slef.move_left()
+            slef.move_left()
+        if kak == 1:
+            slef.move_right()
+            slef.move_right()
+        if kak == 0:
+            slef.move_left()
+            slef.move_left()
+            slef.move_right()
+
 
 class Car(pygame.sprite.Sprite):
     def __init__(self, x, y, filename):
@@ -70,7 +82,7 @@ class Car(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(
             topleft=(x, y))
         self.y = y
-        self.speed = random.choice((0.3, 0.5, 0.7))
+        self.speed = 0.3
 
     def update(self):
         self.rect.y = self.y
@@ -124,11 +136,14 @@ cars = pygame.sprite.Group()
 score = 0
 
 running = True
+read_cnt = 0
+start_time = time.time()
 while running:
-    if time.time() - t > 1:
+    if time.time() - t > 5:
         t = time.time()
         col = random.randint(0, 2)
-        typ = random.randint(1, 5)
+        typ = random.randint(1, 3)
+        typ = 4
         if typ < 4:
             car1 = Car(W // 3 * col + (W - 40) // 6 - car_w / 2 + col // 2 * 10 + (col == 1) * 7, -car_h,
                        '../assets/Sprites/Car' + str(typ) + '.png')
@@ -151,25 +166,25 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    value=device.get_data()
-    if(abs(value)==1):
-        mashinka_x+=value
-        if(mashinka_x>2*DRIFT):
-            mashinka_x=2*DRIFT
-        if(mashinka_x<-2*DRIFT):
-            mashinka_x=-2*DRIFT
-        if mashinka_x>DRIFT:
-            car.move_right()
-            car.move_right()
-        elif mashinka_x<-DRIFT:
-            car.move_left()
-            car.move_left()
-        else:
-            car.move_left()
-            car.move_left()
-            car.move_right()
-    screen.fill(GREY)
+    if device.ready_to_get_data():
+        window = device.get_window(4)
+        sum = 0
+        for a in window:
+            sum += a
+        if sum == 0:
+            read_cnt = 0
+        print(read_cnt)
+        if read_cnt % 4 == 0:
+            if sum == 1 or sum == 2:
+                mashinka_x = -1
+            if sum >= 3:
+                mashinka_x = 1
+            if sum == 0:
+                mashinka_x = 0
+            car.set_state(mashinka_x)
+        read_cnt += 1
 
+    screen.fill(GREY)
     pygame.draw.rect(screen, WHITE,
                      (pol1_x, pol1_y, 20, H))
     pygame.draw.rect(screen, WHITE,
@@ -183,6 +198,7 @@ while running:
     moneys.update()
 
     draw_text(screen, 'Score: ' + str(score), 18, 30, 5)
+    draw_text(screen, 'Time: ' + str(int(time.time()-start_time)), 18, 50, 5)
 
     pygame.display.flip()
 

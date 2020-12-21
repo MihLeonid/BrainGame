@@ -102,34 +102,73 @@ def get_good_data():
     #print(new_data)
     history_data=None
     return new_data
-def get_data():
+data_history = []
+def ready_to_get_data():
     global interpolation
     global last_data
     global prev_last_data
     global last_data_time
     global prev_last_data_time
+    global data_history
     data=get_good_data()
     if(data is None):
-        if interpolation:
-            if(last_data_time==prev_last_data_time):
-                return 0
-            return last_data+((last_data-prev_last_data)/(last_data_time-prev_last_data_time))*(time.time()-last_data_time)
-        return 0
+        return False
     else:
         data=sum(data)/2000
         print(data, end=' ')
         result=0
-        if data>0.9:
-            result=-1
-        if data>2.5:
-            result=1
+        if data>0.7:
+            result = 1
+        #if data>0.9:
+        #    result=-1
+        #if data>2.5:
+        #    result=1
         data=result
         print(result)
         prev_last_data=last_data
         prev_last_data_time=last_data_time
         last_data=data
         last_data_time=time.time()
+        data_history.append(data)
+        return True
+def get_data():
+    global interpolation
+    global last_data
+    global prev_last_data
+    global last_data_time
+    global prev_last_data_time
+    global data_history
+    data=get_good_data()
+    if(data is None):
+        if interpolation:
+            if(last_data_time==prev_last_data_time):
+                data_history.aooend(0)
+                return 0
+            value = last_data+((last_data-prev_last_data)/(last_data_time-prev_last_data_time))*(time.time()-last_data_time)
+            data_history.append(value)
+            return value
+        return 0
+    else:
+        data=sum(data)/2000
+        print(data, end=' ')
+        result=0
+        if data>0.7:
+            result = 1
+        #if data>0.9:
+        #    result=-1
+        #if data>2.5:
+        #    result=1
+        data=result
+        print(result)
+        prev_last_data=last_data
+        prev_last_data_time=last_data_time
+        last_data=data
+        last_data_time=time.time()
+        data_history.append(data)
         return data
 def stop():
     board.stop_stream()
     board.release_session()
+def get_window(cnt):
+    global data_history
+    return data_history[-cnt:]
