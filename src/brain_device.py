@@ -1,3 +1,4 @@
+#BEFORE IMPORTING THIS FILE IMPORT SOME ANALYSIS as analysis !!!
 import time
 import numpy as np
 import random
@@ -6,18 +7,40 @@ import sys
 from brainflow.board_shim import BoardShim, BrainFlowInputParams, LogLevels, BoardIds
 from brainflow.data_filter import DataFilter, FilterTypes, AggOperations, WindowFunctions, DetrendOperations
 
-BOARD_ID=BoardIds.BRAINBIT_BOARD.value
 
-interpolation=True
-def no_interpolation():
-    global interpolation
-    interpolation=False
+# CONSTANTS
+BOARD_ID=BoardIds.SYNTETIC_BOARD.value
 
-params = BrainFlowInputParams()
-params.timeout = 15  # discovery timeout (seconds)
+#OFFSET = 0.2
+OFFSET = 0
 
-BoardShim.enable_dev_board_logger()
+WAVES = {
+    #"gamma": ("γ", ("T3", "T4"), 500, (30 - OFFSET, 60 - OFFSET)),
+    "theta": ("θ", ("T3", "T4", "O1", "O2"), 100, (4 - OFFSET, 8 - OFFSET)),
+    "theta_": ("θ_", ("T3", "T4", "O1", "O2"), 100, (3 - OFFSET, 7 - OFFSET)),
+    "delta": ("δ", ("T3", "T4", "O1", "O2"), 100, (1 - OFFSET, 4 - OFFSET)),
+    "delta_theta": ("δθ", ("T3", "T4", "O1", "O2"), 100, (3 - OFFSET, 5 - OFFSET)),
+    "delta_theta_": ("δθ_", ("T3", "T4", "O1", "O2"), 100, (2.4 - OFFSET, 4.2 - OFFSET)),
+    "theta_alpha": ("θα", ("T3", "T4", "O1", "O2"), 100, (5 - OFFSET, 11 - OFFSET)),
+    "beta1": ("β1", ("T3", "T4", "O1", "O2"), 100, (14 - OFFSET, 25 - OFFSET)),
+    "beta2": ("β2", ("T3", "T4"), 100, (25 - OFFSET, 40 - OFFSET)),
+    "alpha": ("α", ("O1", "O2"), 100, (8 - OFFSET, 13 - OFFSET)),
+    "alpha_beta": ("αβ", ("T3", "T4", "O1", "O2"), 100, (12.5 - OFFSET, 20 - OFFSET)),
+    #"alpha": ("α", ("O1", "O2"), 100, (7 - OFFSET, 13 - OFFSET)),
+    "kappa": ("κ", ("T3", "T4", "O1", "O2"), 100, (8 - OFFSET, 13 - OFFSET)),
+    "lambda": ("λ", ("O1", "O2"), 100, (12 - OFFSET, 14 - OFFSET))
+    "lambda*": ("λ*", ("T3", "T4", "O1", "O2"), 100, (3.8 - OFFSET, 4.8 - OFFSET))
+}
+eeg_channels = BoardShim.get_eeg_channels(BOARD_ID)
+sampling_rate = BoardShim.get_sampling_rate(BOARD_ID)
+ZONE_ORDER = BoardShim.get_eeg_names(BOARD_ID)
+BUGGY_BRAINFLOW = 1
+NFFT = 512
+RNFFT = NFFT + BUGGY_BRAINFLOW
+MAX_DATA = RNFFT
+MAX_POWER = 5
 
+#PLAYBACK
 if len(sys.argv) == 1:
     session_id = "brain-" + "".join(random.choice("abcdefghijklmnopqrstuvwxyz") for _ in range(10))
     print("Session ID:", session_id)
@@ -33,142 +56,75 @@ else:
     board.prepare_session()
     board.start_stream()
 
-last_data=0
-prev_last_data=0
-last_data_time=time.time()
-prev_last_data_time=time.time()
 
-def get_some_data():
-    return board.get_board_data()
-
+#INFORMATION GATHERING
 history_data=None
-
-def get_good_data():
+hist_band_power = {wave: [] for wave in WAVES.keys()}
+ready = False
+def information_gathering():
     global history_data
-    sampling_rate = BoardShim.get_sampling_rate(BOARD_ID)
-    nfft = DataFilter.get_nearest_power_of_two (sampling_rate)
-    eeg_channels = BoardShim.get_eeg_channels (BOARD_ID)
+    global hist_band_power
+    global ready
 
-    if history_data is None:
-        history_data = get_some_data()
+    params = BrainFlowInputParams()
+    params.timeout = 15
+    BoardShim.enable_dev_board_logger()
 
-    history_data = np.hstack((history_data, get_some_data()))
-    if len(history_data[0]) <= nfft:
-        return None
+    board = BoardShim(BOARD_ID, params)
+    board.prepare_session()
+    board.start_stream()
 
-    result=[]
-    new_data=[]
-    tsum=0
-    tsub=0
-    osum=0
-    osub=0
-    delta_theta=[]
-    theta_alpha=[]
-    lambda_sum=0
-    for a in range(4):
-        eeg_channel = eeg_channels[a]
-        DataFilter.detrend (history_data[eeg_channel], DetrendOperations.LINEAR.value)
-        psd = DataFilter.get_psd_welch (history_data[eeg_channel], nfft, nfft // 2, sampling_rate, WindowFunctions.BLACKMAN_HARRIS.value)
-        band_power_alpha = DataFilter.get_band_power (psd, 7.0, 13.0)
-        band_power_alpha_beta = DataFilter.get_band_power (psd, 12.5, 20.0)
-        band_power_theta_alpha = DataFilter.get_band_power (psd, 5.0, 11.0)
-        band_power_theta = DataFilter.get_band_power (psd, 3.0, 7.0)
-        band_power_kapa = DataFilter.get_band_power (psd, 8.0, 13.0)
-        band_power_delta_theta = DataFilter.get_band_power (psd, 2.2, 4.0)
-        band_power_beta = DataFilter.get_band_power (psd, 14.0, 30.0)
-        band_power_lambda = DataFilter.get_band_power (psd, 3.8, 4.8)
-        #print(band_power_lambda, end=" ")
-        power=band_power_delta_theta
-        if(a==0):
-            tsum+=power
-            tsub+=power
-        if a==1:
-            tsum+=power
-            tsub-=power
-        if a==2:
-            osum+=power
-            osub+=power
-            lambda_sum+=band_power_lambda
-        if a==3:
-            osum+=power
-            osub-=power
-            lambda_sum+=band_power_lambda
-        #result.append([power, band_power_theta, band_power_theta_alpha])
-        delta_theta.append(band_power_delta_theta)
-        theta_alpha.append(band_power_theta_alpha)
-    new_data=[tsum, osum]
-    #print(new_data, end=" ")
-    #result=new_data
-    #print(new_data)
-    history_data=None
-    return new_data
-data_history = []
-def ready_to_get_data():
-    global interpolation
-    global last_data
-    global prev_last_data
-    global last_data_time
-    global prev_last_data_time
-    global data_history
-    data=get_good_data()
-    if(data is None):
-        return False
-    else:
-        data=sum(data)/2000
-        print(data, end=' ')
-        result=0
-        if data>0.7:
-            result = 1
-        #if data>0.9:
-        #    result=-1
-        #if data>2.5:
-        #    result=1
-        data=result
-        print(result)
-        prev_last_data=last_data
-        prev_last_data_time=last_data_time
-        last_data=data
-        last_data_time=time.time()
-        data_history.append(data)
-        return True
+    while True:
+        data = board.get_board_data()
+        eeg_data = np.array([data[chan,:] for chan in eeg_channels])
+        if len(eeg_data[0]):
+            if history_data is None:
+                history_data = eeg_data
+            else:
+                history_data = np.hstack((history_data, eeg_data))
+                history_data = np.array([history_data[chan, -MAX_DATA:] for chan in eeg_channels])
+            if history_data is not None and len(history_data[0]) >= RNFFT:
+                psds = []
+                for row in history_data:
+                    row = row[-RNFFT:].copy()
+                    DataFilter.detrend(row, DetrendOperations.LINEAR.value)
+                    psds.append(DataFilter.get_psd_welch(row, NFFT, NFFT // 2, sampling_rate, WindowFunctions.BLACKMAN_HARRIS.value))
+                for i, (wave, (symbol, zones, limit, (l, r))) in enumerate(WAVES.items()):
+                    band_power = dict()
+                    for zone in zones:
+                        band_power[zone] = DataFilter.get_band_power(psds[ZONE_ORDER.index(zone)], l, r)
+                    hist_band_power[wave].append(band_power)
+                    hist_band_power[wave] = hist_band_power[wave][-MAX_POWER:]
+                    if len(hist_band_power[wave]) == MAX_POWER:
+                        ready = True
+        else:
+            #TODO TRY
+            time.sleep(0.1)
+
+#ANALYSIS
+result_history = []
 def get_data():
-    global interpolation
-    global last_data
-    global prev_last_data
-    global last_data_time
-    global prev_last_data_time
-    global data_history
-    data=get_good_data()
-    if(data is None):
-        if interpolation:
-            if(last_data_time==prev_last_data_time):
-                data_history.aooend(0)
-                return 0
-            value = last_data+((last_data-prev_last_data)/(last_data_time-prev_last_data_time))*(time.time()-last_data_time)
-            data_history.append(value)
-            return value
-        return 0
-    else:
-        data=sum(data)/2000
-        print(data, end=' ')
-        result=0
-        if data>0.7:
-            result = 1
-        #if data>0.9:
-        #    result=-1
-        #if data>2.5:
-        #    result=1
-        data=result
-        print(result)
-        prev_last_data=last_data
-        prev_last_data_time=last_data_time
-        last_data=data
-        last_data_time=time.time()
-        data_history.append(data)
-        return data
+    global result_history
+    global hist_band_power
+    global ready
+    if ready:
+        result = analysis.proccess(hist_band_power)
+        result_history.append(result)
+        return result
+    return None
+def get_window(cnt):
+    global result_history
+    return result_history[-cnt:]
+
+#MANUPULATION
+def start():
+    threading.Thread(target=information_gathering, daemon=True).start()
+
 def stop():
     board.stop_stream()
     board.release_session()
-def get_window(cnt):
-    global data_history
-    return data_history[-cnt:]
+
+def graph():
+    pass
+if __name__ == "__main__":
+    SPHERE = 0.1

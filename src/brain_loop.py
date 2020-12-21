@@ -2,6 +2,8 @@ import argparse
 import time
 import math
 import numpy as np
+
+import analysis.three_state_eyes as analysis
 import brain_device as device
 
 running = True
