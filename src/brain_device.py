@@ -25,7 +25,7 @@ WAVES = {
     #"delta": ("δ", ("T3", "T4", "O1", "O2"), 100, (1 - OFFSET, 4 - OFFSET)),
     #"delta_theta": ("δθ", ("T3", "T4", "O1", "O2"), 100, (3 - OFFSET, 5 - OFFSET)),
     "delta_theta_": ("δθ_", ("T3", "T4", "O1", "O2"), 100, (2.4 - OFFSET, 4.2 - OFFSET)),
-    #"theta_alpha": ("θα", ("T3", "T4", "O1", "O2"), 100, (5 - OFFSET, 11 - OFFSET)),
+    #"theta_alpha": ("θα", ("T3", "T4", "O1", "O2"), 100, (5.2 - OFFSET, 11.2 - OFFSET)),
     "beta1": ("β1", ("T3", "T4", "O1", "O2"), 100, (14 - OFFSET, 25 - OFFSET)),
     "beta2": ("β2", ("T3", "T4"), 100, (25 - OFFSET, 40 - OFFSET)),
     "alpha": ("α", ("O1", "O2"), 100, (8 - OFFSET, 13 - OFFSET)),
