@@ -109,6 +109,7 @@ def get_data():
         return last_data+((last_data-prev_last_data)/(last_data_time-prev_last_data_time))*(time.time()-last_data_time)
     else:
         data=sum(data)/2000
+        print(data, end=' ')
         result=0
         if data>0.9:
             result=-1
