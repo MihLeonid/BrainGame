@@ -13,27 +13,27 @@ from brainflow.data_filter import DataFilter, FilterTypes, AggOperations, Window
 
 
 # CONSTANTS
-BOARD_ID=BoardIds.SYNTHETIC_BOARD.value
+BOARD_ID=BoardIds.BRAINBIT_BOARD.value
 
 #OFFSET = 0.2
 OFFSET = 0
 
 WAVES = {
-    #"gamma": ("γ", ("T3", "T4"), 500, (30 - OFFSET, 60 - OFFSET)),
-    "theta": ("θ", ("T3", "T4", "O1", "O2"), 100, (4 - OFFSET, 8 - OFFSET)),
+    ##"gamma": ("γ", ("T3", "T4"), 500, (30 - OFFSET, 60 - OFFSET)),
+    #"theta": ("θ", ("T3", "T4", "O1", "O2"), 100, (4 - OFFSET, 8 - OFFSET)),
     "theta_": ("θ_", ("T3", "T4", "O1", "O2"), 100, (3 - OFFSET, 7 - OFFSET)),
-    "delta": ("δ", ("T3", "T4", "O1", "O2"), 100, (1 - OFFSET, 4 - OFFSET)),
-    "delta_theta": ("δθ", ("T3", "T4", "O1", "O2"), 100, (3 - OFFSET, 5 - OFFSET)),
+    #"delta": ("δ", ("T3", "T4", "O1", "O2"), 100, (1 - OFFSET, 4 - OFFSET)),
+    #"delta_theta": ("δθ", ("T3", "T4", "O1", "O2"), 100, (3 - OFFSET, 5 - OFFSET)),
     "delta_theta_": ("δθ_", ("T3", "T4", "O1", "O2"), 100, (2.4 - OFFSET, 4.2 - OFFSET)),
-    "theta_alpha": ("θα", ("T3", "T4", "O1", "O2"), 100, (5 - OFFSET, 11 - OFFSET)),
+    #"theta_alpha": ("θα", ("T3", "T4", "O1", "O2"), 100, (5 - OFFSET, 11 - OFFSET)),
     "beta1": ("β1", ("T3", "T4", "O1", "O2"), 100, (14 - OFFSET, 25 - OFFSET)),
     "beta2": ("β2", ("T3", "T4"), 100, (25 - OFFSET, 40 - OFFSET)),
     "alpha": ("α", ("O1", "O2"), 100, (8 - OFFSET, 13 - OFFSET)),
-    "alpha_beta": ("αβ", ("T3", "T4", "O1", "O2"), 100, (12.5 - OFFSET, 20 - OFFSET)),
+    #"alpha_beta": ("αβ", ("T3", "T4", "O1", "O2"), 100, (12.5 - OFFSET, 20 - OFFSET)),
     #"alpha": ("α", ("O1", "O2"), 100, (7 - OFFSET, 13 - OFFSET)),
     "kappa": ("κ", ("T3", "T4", "O1", "O2"), 100, (8 - OFFSET, 13 - OFFSET)),
     "lambda": ("λ", ("O1", "O2"), 100, (12 - OFFSET, 14 - OFFSET)),
-    "lambda*": ("λ*", ("T3", "T4", "O1", "O2"), 100, (3.8 - OFFSET, 4.8 - OFFSET))
+    #"lambda*": ("λ*", ("T3", "T4", "O1", "O2"), 100, (3.8 - OFFSET, 4.8 - OFFSET))
 }
 eeg_channels = BoardShim.get_eeg_channels(BOARD_ID)
 sampling_rate = BoardShim.get_sampling_rate(BOARD_ID)
@@ -130,6 +130,14 @@ def stop():
     board.release_session()
 
 SPHERE = 0.1
+def log():
+    global ready
+    global hist_band_power
+    if ready:
+        for i, (wave, (symbol, zones, limit, (l, r))) in enumerate(WAVES.items()):
+            band_power = hist_band_power[wave][-1]
+            print(wave, band_power)
+        print()
 def animation():
     global hist_band_power
     import matplotlib.pyplot as plt
@@ -169,8 +177,7 @@ def animation():
                 mne.viz.plot_topomap(np.array([band_power[zone] if zone in zones else 0 for zone in ZONE_ORDER]), pos=info, vmin=0, vmax=limit, contours=0, axes=inner_axs[1 + i][0], show=False, sphere=SPHERE)
                 inner_axs[1 + i][1].set_ylim(0, max(limit, max([max(elem.values()) if len(elem) else 0 for elem in hist_band_power[wave]])))
                 inner_axs[1 + i][1].plot([sum(elem.values())/len(elem.values()) if len(elem.values()) else 0 for elem in hist_band_power[wave]])
-                print(wave, band_power)
-            print()
+            log()
 
             """
             sig_fft[np.abs(sample_freq) > sample_freq[10]] = 0
@@ -184,7 +191,7 @@ def animation():
             plt.pause(0.01)
 
 
-    ani = FuncAnimation(plt.gcf(), animate, 1000)
+    ani = FuncAnimation(plt.gcf(), animate, 100)
     plt.show()
 if __name__ == "__main__":
     start()
