@@ -8,6 +8,11 @@ from brainflow.data_filter import DataFilter, FilterTypes, AggOperations, Window
 
 BOARD_ID=BoardIds.BRAINBIT_BOARD.value
 
+interpolation=True
+def no_interpolation():
+    global interpolation
+    interpolation=False
+
 params = BrainFlowInputParams()
 params.timeout = 15  # discovery timeout (seconds)
 
@@ -98,15 +103,18 @@ def get_good_data():
     history_data=None
     return new_data
 def get_data():
+    global interpolation
     global last_data
     global prev_last_data
     global last_data_time
     global prev_last_data_time
     data=get_good_data()
     if(data is None):
-        if(last_data_time==prev_last_data_time):
-            return 0
-        return last_data+((last_data-prev_last_data)/(last_data_time-prev_last_data_time))*(time.time()-last_data_time)
+        if interpolation:
+            if(last_data_time==prev_last_data_time):
+                return 0
+            return last_data+((last_data-prev_last_data)/(last_data_time-prev_last_data_time))*(time.time()-last_data_time)
+        return 0
     else:
         data=sum(data)/2000
         print(data, end=' ')
