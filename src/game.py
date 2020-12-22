@@ -182,6 +182,7 @@ def side_thread():
             self.y = H / 2
             self.surf = pygame.Surface((2 * r, 2 * r))
             self.rect = self.surf.get_rect(center = (int(self.x), int(H - self.y)))
+            self.speed = 0
         
         def set_y(self, new_y):
             self.y = new_y
@@ -189,6 +190,27 @@ def side_thread():
         
         def draw(self, surface):
             surface.blit(self.image, self.rect)
+
+        def add_speed(self, addition):
+            self.speed += addition
+            if self.speed < -max_speed:
+                self.speed = -max_speed
+            if self.speed > max_speed:
+                self.speed = max_speed
+        
+        def move(self, delta_y):
+            new_y = self.y + delta_y
+            if new_y <= y_min:
+                new_y = y_min
+                if self.speed < 0:
+                    self.speed = -self.speed / 2
+            if new_y >= y_max:
+                new_y = y_max
+                if self.speed > 0:
+                    self.speed = -self.speed / 2
+            self.y = new_y
+            self.rect = self.surf.get_rect(center = (W // 2, int(H - self.y)))
+        
         
     ball = Ball()
     player = Player()
@@ -250,8 +272,8 @@ def side_thread():
             if USE_DEVICE:
                 history_data.append(value)
                 # print(value)
-                value = max(0, value - average_relax) * MUSCLE_COEFF
-                player.add_speed(value * G * delta_time)
+                vаlue = max(0, value - average_relax) * MUSCLE_COEFF
+                player.add_speed(0.334 * value * G * delta_time)
         
             player.add_speed(-G * delta_time)
             player.move(player.speed * delta_time)
@@ -280,29 +302,39 @@ def side_thread():
                     print(average)
         
         if education_id == 0:
-            ball.set_y(H * value / 15)
+            ball.add_speed(0.334 * value * G * delta_time)
+            ball.add_speed(-G * delta_time)
+            ball.move(ball.speed * delta_time)
             ball.draw(sc)
         elif education_id == 1:
             education_surface = my_font.render("Приготовьтесь расслабить мышцы", False, BLACK)
             sc.blit(education_surface, (100, H * 3 / 5))
-            ball.set_y(H * value / 15)
+            ball.add_speed(0.334 * value * G * delta_time)
+            ball.add_speed(-G * delta_time)
+            ball.move(ball.speed * delta_time)
             ball.draw(sc)
         elif education_id == 2:
             education_surface = my_font.render("Расслабьте мышцы", False, BLACK)
             sc.blit(education_surface, (100, H * 3 / 5))
             education_data.append(value)
-            ball.set_y(H * value / 15)
+            ball.add_speed(0.334 * value * G * delta_time)
+            ball.add_speed(-G * delta_time)
+            ball.move(ball.speed * delta_time)
             ball.draw(sc)
         elif education_id == 3:
             education_surface = my_font.render("Приготовьтесь напрягать мышцы", False, BLACK)
             sc.blit(education_surface, (100, H * 3 / 5))
-            ball.set_y(H * value / 15)
+            ball.add_speed(0.334 * value * G * delta_time)
+            ball.add_speed(-G * delta_time)
+            ball.move(ball.speed * delta_time)
             ball.draw(sc)
         elif education_id == 4:
             education_surface = my_font.render("Напрягайте мышцы", False, BLACK)
             sc.blit(education_surface, (100, H * 3 / 5))
             education_data.append(value)
-            ball.set_y(H * value / 15)
+            ball.add_speed(0.334 * value * G * delta_time)
+            ball.add_speed(-G * delta_time)
+            ball.move(ball.speed * delta_time)
             ball.draw(sc)
         else:
             player.draw(sc)
