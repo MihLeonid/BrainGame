@@ -5,6 +5,7 @@ import time
 import brain_device as device
 
 device.start()
+device.prepare()
 pygame.init()
 
 W = 600
