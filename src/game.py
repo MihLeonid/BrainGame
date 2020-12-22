@@ -259,7 +259,7 @@ def side_thread():
         sc.fill(SKY)
         
         for cloud in clouds:
-            cloud.move(-x_speed * delta_time / 2)
+            cloud.move(-3 * x_speed * delta_time / 2)
             cloud.draw(sc)
         
         
@@ -322,10 +322,10 @@ def side_thread():
                 coin.kill()
                 coins.remove(coin)
         
-            hurt_surface = my_font.render(str(hurt_cnt), False, RED)
+            hurt_surface = my_font.render("Hits: " + str(hurt_cnt), False, RED)
             sc.blit(hurt_surface, (0, 0))
-            coin_surface = my_font.render(str(coin_cnt), False, GOLD)
-            sc.blit(coin_surface, (90, 0))
+            coin_surface = my_font.render("Coins: " + str(coin_cnt), False, GOLD)
+            sc.blit(coin_surface, (0, 90))
         
         pygame.display.update()
         prevtime = time.time()
