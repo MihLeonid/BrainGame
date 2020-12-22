@@ -4,8 +4,7 @@ import time
 
 import brain_device as device
 
-device.no_interpolation()
-
+device.start()
 pygame.init()
 
 W = 600

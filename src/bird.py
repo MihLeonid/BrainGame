@@ -8,6 +8,9 @@ from pygame.locals import *
 
 import brain_device as device
 
+device.start()
+device.prepare()
+
 SEED = 1337
 random.seed(SEED)
 
@@ -17,9 +20,9 @@ H = 720
 W = 720
 
 MIN_DIFFICULTY = 10;
-DIFFICULTY = 54;
+DIFFICULTY = 50;
 DIFFICULTY_STEPS = 100;
-spawn_period = 3
+spawn_period = 18
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -38,7 +41,7 @@ y_max = H - r
 G = 800
 max_speed = 1300
 
-x_speed = 160
+x_speed = 40
 block_width = 64
 
 
@@ -50,7 +53,7 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.image.load("../assets/Sprites/Bird.png")
         self.surf = pygame.Surface((2 * r, 2 * r))
-        self.rect = self.surf.get_rect(center = (W // 2, H // 2))
+        self.rect = self.surf.get_rect(center = (W // 5, H // 2))
         self.speed = 0
         self.x = W // 2
         self.y = H // 2
@@ -73,7 +76,7 @@ class Player(pygame.sprite.Sprite):
             if self.speed > 0:
                 self.speed = -self.speed / 2
         self.y = new_y
-        self.rect = self.surf.get_rect(center = (W // 2, int(H - self.y)))
+        self.rect = self.surf.get_rect(center = (W // 5, int(H - self.y)))
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
@@ -87,7 +90,7 @@ class Barrier(pygame.sprite.Sprite):
         self.surf = pygame.Surface((block_width, H))
         self.x = 3 * W // 2
         self.y = int((-H/2+(H/DIFFICULTY_STEPS)*random.randint(MIN_DIFFICULTY, DIFFICULTY)))
-        if (up_down_cnt==2)or(up_down_cnt==-2 and random.randint(0, 1) == 0):
+        if (up_down_cnt==2) or (up_down_cnt==-2 and random.randint(0, 1) == 0):
             self.y=H-self.y;
             if(up_down_cnt>0):
                 up_down_cnt=0;
@@ -126,15 +129,15 @@ while running:
         barriers.append(Barrier())
 
     value = device.get_data()
-    #player.add_speed(0.334 * value * G * delta_time)
-    player.move(value*delta_time*G/3)
+    player.add_speed(0.334 * value * G * delta_time)
+    #player.move(value*delta_time*G/3)
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             running = False
         #elif i.type == pygame.KEYDOWN:
         #    if i.key == pygame.K_UP:
         #        player.add_speed(17 * G * delta_time)
-    #player.add_speed(-G * delta_time)
+    player.add_speed(-G * delta_time)
     player.move(player.speed * delta_time)
     sc.fill(WHITE)
     player.draw(sc)

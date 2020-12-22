@@ -1,4 +1,4 @@
-import analysis.three_state_eyes as analysis
+import analysis.theta as analysis
 #IMPORTING THIS FILE IMPORT RIGHT ANALYSIS as analysis !!!
 import pygame
 import mne
@@ -22,27 +22,27 @@ WAVES = {
     ##"gamma": ("γ", ("T3", "T4"), 500, (30 - OFFSET, 60 - OFFSET)),
     #"theta": ("θ", ("T3", "T4", "O1", "O2"), 100, (4 - OFFSET, 8 - OFFSET)),
     "theta_": ("θ_", ("T3", "T4", "O1", "O2"), 100, (3 - OFFSET, 7 - OFFSET)),
-    #"delta": ("δ", ("T3", "T4", "O1", "O2"), 100, (1 - OFFSET, 4 - OFFSET)),
+    #"delta": ("δ", ("T3", "T4", "O1", "O2"), 100, (1 - OFFSET, 2 - OFFSET)),
     #"delta_theta": ("δθ", ("T3", "T4", "O1", "O2"), 100, (3 - OFFSET, 5 - OFFSET)),
     "delta_theta_": ("δθ_", ("T3", "T4", "O1", "O2"), 100, (2.4 - OFFSET, 4.2 - OFFSET)),
     #"theta_alpha": ("θα", ("T3", "T4", "O1", "O2"), 100, (5.2 - OFFSET, 11.2 - OFFSET)),
     "beta1": ("β1", ("T3", "T4", "O1", "O2"), 100, (14 - OFFSET, 25 - OFFSET)),
     "beta2": ("β2", ("T3", "T4"), 100, (25 - OFFSET, 40 - OFFSET)),
-    "alpha": ("α", ("O1", "O2"), 100, (8 - OFFSET, 13 - OFFSET)),
+    #"alpha": ("α", ("O1", "O2"), 100, (8 - OFFSET, 13 - OFFSET)),
     #"alpha_beta": ("αβ", ("T3", "T4", "O1", "O2"), 100, (12.5 - OFFSET, 20 - OFFSET)),
-    #"alpha": ("α", ("O1", "O2"), 100, (7 - OFFSET, 13 - OFFSET)),
+    "alpha": ("α", ("O1", "O2"), 100, (7 - OFFSET, 13 - OFFSET)),
     "kappa": ("κ", ("T3", "T4", "O1", "O2"), 100, (8 - OFFSET, 13 - OFFSET)),
     "lambda": ("λ", ("O1", "O2"), 100, (12 - OFFSET, 14 - OFFSET)),
-    #"lambda*": ("λ*", ("T3", "T4", "O1", "O2"), 100, (3.8 - OFFSET, 4.8 - OFFSET))
+    "lambda_": ("λ_", ("T3", "T4", "O1", "O2"), 100, (3.8 - OFFSET, 4.8 - OFFSET))
 }
 eeg_channels = BoardShim.get_eeg_channels(BOARD_ID)
 sampling_rate = BoardShim.get_sampling_rate(BOARD_ID)
 ZONE_ORDER = BoardShim.get_eeg_names(BOARD_ID)
 BUGGY_BRAINFLOW = 1
-NFFT = 512
+NFFT = 256
 RNFFT = NFFT + BUGGY_BRAINFLOW
 MAX_DATA = RNFFT
-MAX_POWER = 5
+MAX_POWER = 9
 
 #INFORMATION GATHERING
 board = None
@@ -193,6 +193,9 @@ def animation():
 
     ani = FuncAnimation(plt.gcf(), animate, 100)
     plt.show()
+def prepare():
+    while get_data() is None:
+        time.sleep(0.1)
 if __name__ == "__main__":
     start()
     animation()
