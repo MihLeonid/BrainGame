@@ -11,8 +11,8 @@ import threading
 import websockets
 
 
-BOARD_ID = BoardIds.BRAINBIT_BOARD.value
-EEG_CHANNELS = BoardShim.get_eeg_channels(BOARD_ID)
+BOARD_ID = BoardIds.CALLIBRI_EMG_BOARD.value
+EEG_CHANNELS = BoardShim.get_emg_channels(BOARD_ID)
 
 
 session_id = "".join(random.choice("abcdefghijklmnopqrstuvwxyz") for _ in range(10))
