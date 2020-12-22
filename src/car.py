@@ -142,13 +142,12 @@ while running:
     if time.time() - t > 5:
         t = time.time()
         col = random.randint(0, 2)
-        typ = random.randint(1, 3)
-        typ = 4
+        typ = random.randint(1, 6)
         if typ < 4:
             car1 = Car(W // 3 * col + (W - 40) // 6 - car_w / 2 + col // 2 * 10 + (col == 1) * 7, -car_h,
                        '../assets/Sprites/Car' + str(typ) + '.png')
             cars.add(car1)
-        if typ == 4:
+        if typ >= 4:
             money = Money(W // 3 * col + (W - 40) // 6 - car_w / 2 + col // 2 * 10 + (col == 1) * 7, -money_h,
                           '../assets/Sprites/Money.png')
 
