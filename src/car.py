@@ -114,6 +114,22 @@ class Money(pygame.sprite.Sprite):
         screen.blit(self.image, self.rect)
 
 
+class Pol(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.x = x
+        self.y = y
+        self.speed = random.choice((0.3,))
+
+    def update(self):
+        self.y += self.speed
+        if self.y > H:
+            self.y = -100
+
+    def draw(self):
+        pygame.draw.rect(screen, WHITE, (self.x, self.y, 20, 100))
+
+
 font_name = pygame.font.match_font('arial')
 
 
@@ -132,6 +148,15 @@ col = 0
 
 moneys = pygame.sprite.Group()
 cars = pygame.sprite.Group()
+pols = pygame.sprite.Group()
+
+cur_y = 0
+while cur_y < H:
+    pol_1 = Pol(pol1_x, cur_y)
+    pols.add(pol_1)
+    pol_2 = Pol(pol2_x, cur_y)
+    pols.add(pol_2)
+    cur_y += 200
 
 score = 0
 
@@ -184,17 +209,16 @@ while running:
         read_cnt += 1
 
     screen.fill(GREY)
-    pygame.draw.rect(screen, WHITE,
-                     (pol1_x, pol1_y, 20, H))
-    pygame.draw.rect(screen, WHITE,
-                     (pol2_x, pol2_y, 20, H))
 
+    for pol in pols:
+        pol.draw()
     car.draw()
     cars.draw(screen)
     moneys.draw(screen)
 
     cars.update()
     moneys.update()
+    pols.update()
 
     draw_text(screen, 'Score: ' + str(score), 18, 30, 5)
     draw_text(screen, 'Time: ' + str(int(time.time()-start_time)), 18, 50, 5)
