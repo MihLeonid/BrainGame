@@ -4,7 +4,7 @@ def proccess(hist_band_power):
     if lambda_s > 100:
     	print(1)
     	return 1
-    if lambda_s > 10:
+    if lambda_s > 20:
     	print(-1)
     	return -1
     print(0)

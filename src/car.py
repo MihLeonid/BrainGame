@@ -82,11 +82,11 @@ class Car(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(
             topleft=(x, y))
         self.y = y
-        self.speed = 0.3
+        self.speed = 0.2
 
-    def update(self):
+    def update(self, t):
         self.rect.y = self.y
-        self.y += self.speed
+        self.y += self.speed * t
 
     def draw(self):
         screen.blit(self.image, self.rect)
@@ -102,11 +102,11 @@ class Money(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(
             topleft=(x, y))
         self.y = y
-        self.speed = random.choice((0.3, 0.5, 0.6))
+        self.speed = 0.2
 
-    def update(self):
+    def update(self, t):
         self.rect.y = self.y
-        self.y += self.speed
+        self.y += self.speed * t
         if self.rect.y > H:
             self.kill()
 
@@ -119,10 +119,10 @@ class Pol(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.x = x
         self.y = y
-        self.speed = random.choice((0.3,))
+        self.speed = 0.2
 
-    def update(self):
-        self.y += self.speed
+    def update(self, t):
+        self.y += self.speed * t
         if self.y > H:
             self.y = -100
 
@@ -163,7 +163,12 @@ score = 0
 running = True
 read_cnt = 0
 start_time = time.time()
+car_state = 0
+car_how_many = 0
+last_time = time.time()
 while running:
+    delta_time = time.time() - last_time
+    time.sleep(1/24)
     if time.time() - t > 5:
         t = time.time()
         col = random.randint(0, 2)
@@ -190,7 +195,14 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    car.set_state(device.get_data())
+    state = device.get_data()
+    if state == car_state:
+        car_how_many += 1
+    else:
+        car_how_many = 0
+        car_state = state
+    if car_how_many >= 10:
+        car.set_state(car_state)
     """
     if device.ready_to_get_data():
         window = device.get_window(4)
@@ -218,12 +230,12 @@ while running:
     cars.draw(screen)
     moneys.draw(screen)
 
-    cars.update()
-    moneys.update()
-    pols.update()
+    cars.update(delta_time)
+    moneys.update(delta_time)
+    pols.update(delta_time)
 
-    draw_text(screen, 'Score: ' + str(score), 18, 30, 5)
-    draw_text(screen, 'Time: ' + str(int(time.time()-start_time)), 18, 50, 5)
+    draw_text(screen, 'Score: ' + str(score), 18, 50, 5)
+    draw_text(screen, 'Time: ' + str(int(time.time()-start_time)), 18, 50, 25)
 
     pygame.display.flip()
 
