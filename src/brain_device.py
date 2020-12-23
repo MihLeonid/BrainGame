@@ -1,4 +1,4 @@
-import analysis.theta as analysis
+import analysis.easy_blink as analysis
 #IMPORTING THIS FILE IMPORT RIGHT ANALYSIS as analysis !!!
 import pygame
 import mne
@@ -18,22 +18,23 @@ BOARD_ID=BoardIds.BRAINBIT_BOARD.value
 #OFFSET = 0.2
 OFFSET = 0
 
+UNI_CONST = 40
+
 WAVES = {
-    ##"gamma": ("γ", ("T3", "T4"), 500, (30 - OFFSET, 60 - OFFSET)),
-    "theta": ("θ", ("T3", "T4", "O1", "O2"), 100, (4 - OFFSET, 8 - OFFSET)),
-    #"theta_": ("θ_", ("T3", "T4", "O1", "O2"), 100, (3 - OFFSET, 7 - OFFSET)),
-    #"delta": ("δ", ("T3", "T4", "O1", "O2"), 100, (1 - OFFSET, 2 - OFFSET)),
-    #"delta_theta": ("δθ", ("T3", "T4", "O1", "O2"), 100, (3 - OFFSET, 5 - OFFSET)),
-    #"delta_theta_": ("δθ_", ("T3", "T4", "O1", "O2"), 100, (2.4 - OFFSET, 4.2 - OFFSET)),
-    #"theta_alpha": ("θα", ("T3", "T4", "O1", "O2"), 100, (5.2 - OFFSET, 11.2 - OFFSET)),
-    "beta1": ("β₁", ("T3", "T4", "O1", "O2"), 100, (14 - OFFSET, 25 - OFFSET)),
-    "beta2": ("β₂", ("T3", "T4"), 100, (25 - OFFSET, 40 - OFFSET)),
-    #"alpha": ("α", ("O1", "O2"), 100, (8 - OFFSET, 13 - OFFSET)),
-    #"alpha_beta": ("αβ", ("T3", "T4", "O1", "O2"), 100, (12.5 - OFFSET, 20 - OFFSET)),
-    "alpha": ("α", ("O1", "O2"), 100, (7 - OFFSET, 13 - OFFSET)),
-    "kappa": ("κ", ("T3", "T4", "O1", "O2"), 100, (8 - OFFSET, 13 - OFFSET)),
-    "lambda": ("λ", ("O1", "O2"), 100, (12 - OFFSET, 14 - OFFSET)),
-    #"lambda_": ("λ_", ("T3", "T4", "O1", "O2"), 100, (3.8 - OFFSET, 4.8 - OFFSET))
+    ##"gamma": ("γ", ("T3", "T4"), 500, (35 - OFFSET, 50 - OFFSET)),
+    "theta": ("θ", ("T3", "T4", "O1", "O2"), UNI_CONST, (4 - OFFSET, 8 - OFFSET)),
+    #"theta_": ("θ_", ("T3", "T4", "O1", "O2"), UNI_CONST, (3 - OFFSET, 7 - OFFSET)),
+    #"delta": ("δ", ("T3", "T4", "O1", "O2"), UNI_CONST, (1 - OFFSET, 2 - OFFSET)),
+    #"delta_theta": ("δθ", ("T3", "T4", "O1", "O2"), UNI_CONST, (3 - OFFSET, 5 - OFFSET)),
+    #"delta_theta_": ("δθ_", ("T3", "T4", "O1", "O2"), UNI_CONST, (2.4 - OFFSET, 4.2 - OFFSET)),
+    #"theta_alpha": ("θα", ("T3", "T4", "O1", "O2"), UNI_CONST, (5.2 - OFFSET, 11.2 - OFFSET)),
+    "beta1": ("β₁", ("T3", "T4", "O1", "O2"), UNI_CONST, (13 - OFFSET, 25 - OFFSET)),
+    "beta2": ("β₂", ("T3", "T4"), UNI_CONST, (25 - OFFSET, 35 - OFFSET)),
+    #"alpha": ("α", ("O1", "O2"), UNI_CONST, (7 - OFFSET, 13 - OFFSET)),
+    #"alpha_beta": ("αβ", ("T3", "T4", "O1", "O2"), UNI_CONST, (12.5 - OFFSET, 20 - OFFSET)),
+    "alpha": ("α", ("O1", "O2"), UNI_CONST, (8 - OFFSET, 13 - OFFSET)),
+    "kappa": ("κ", ("T3", "T4"), UNI_CONST, (8 - OFFSET, 12 - OFFSET)),
+    "lambda": ("λ", ("O1", "O2"), UNI_CONST, (4 - OFFSET, 5 - OFFSET)),
 }
 eeg_channels = BoardShim.get_eeg_channels(BOARD_ID)
 sampling_rate = BoardShim.get_sampling_rate(BOARD_ID)
@@ -191,7 +192,7 @@ def animation():
             plt.pause(0.01)
 
 
-    ani = FuncAnimation(plt.gcf(), animate, 100)
+    ani = FuncAnimation(plt.gcf(), animate)
     plt.show()
 def prepare():
     while get_data() is None:

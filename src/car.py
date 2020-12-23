@@ -190,6 +190,8 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+    car.set_state(device.get_data())
+    """
     if device.ready_to_get_data():
         window = device.get_window(4)
         sum = 0
@@ -207,7 +209,7 @@ while running:
                 mashinka_x = 0
             car.set_state(mashinka_x)
         read_cnt += 1
-
+    """
     screen.fill(GREY)
 
     for pol in pols:
